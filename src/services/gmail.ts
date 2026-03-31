@@ -38,4 +38,52 @@ export async function getSenders(): Promise<ApiResponse<SenderEntry[]>> {
   }
 }
 
+export async function batchDelete(senderAddress: string): Promise<ApiResponse<{ deleted: number }>> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 60000)
+
+  try {
+    const res = await fetch('/api/gmail/batch-delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senderAddress }),
+      signal: controller.signal,
+    })
+    clearTimeout(timeout)
+    const json = await res.json()
+    if (!res.ok) return { data: null, error: json.error || 'Delete failed', meta: {} }
+    return json
+  } catch (err) {
+    clearTimeout(timeout)
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      return { data: null, error: 'Request timed out', meta: {} }
+    }
+    return { data: null, error: 'Network error', meta: {} }
+  }
+}
+
+export async function batchArchive(senderAddress: string): Promise<ApiResponse<{ archived: number }>> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 60000)
+
+  try {
+    const res = await fetch('/api/gmail/batch-archive', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senderAddress }),
+      signal: controller.signal,
+    })
+    clearTimeout(timeout)
+    const json = await res.json()
+    if (!res.ok) return { data: null, error: json.error || 'Archive failed', meta: {} }
+    return json
+  } catch (err) {
+    clearTimeout(timeout)
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      return { data: null, error: 'Request timed out', meta: {} }
+    }
+    return { data: null, error: 'Network error', meta: {} }
+  }
+}
+
 export type { SenderEntry, SendersMeta }
