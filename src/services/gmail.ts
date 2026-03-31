@@ -86,4 +86,38 @@ export async function batchArchive(senderAddress: string): Promise<ApiResponse<{
   }
 }
 
+export async function checkUnsubscribe(
+  senderAddress: string,
+): Promise<ApiResponse<{ hasUnsubscribe: boolean; unsubscribeUrl: string | null }>> {
+  try {
+    const res = await fetch('/api/gmail/unsubscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senderAddress }),
+    })
+    const json = await res.json()
+    if (!res.ok) return { data: null, error: json.error || 'Check failed', meta: {} }
+    return json
+  } catch {
+    return { data: null, error: 'Network error', meta: {} }
+  }
+}
+
+export async function executeUnsubscribe(
+  senderAddress: string,
+): Promise<ApiResponse<{ executed: boolean }>> {
+  try {
+    const res = await fetch('/api/gmail/unsubscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senderAddress, action: 'execute' }),
+    })
+    const json = await res.json()
+    if (!res.ok) return { data: null, error: json.error || 'Unsubscribe failed', meta: {} }
+    return json
+  } catch {
+    return { data: null, error: 'Network error', meta: {} }
+  }
+}
+
 export type { SenderEntry, SendersMeta }
