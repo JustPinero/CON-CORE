@@ -27,10 +27,11 @@
 
 ## Auth
 
-- **Provider:** Google OAuth2 — direct integration via `googleapis` SDK
+- **Provider:** Google OAuth2 — direct integration via `google-auth-library` SDK (OAuth2 only)
 - **Flow:** Authorization code flow handled by `/api/auth/login` and `/api/auth/callback`
 - **Token storage:** Access and refresh tokens stored encrypted in Supabase `auth_tokens` table
 - **Scope:** Gmail read/modify, Calendar read/write
+- **Note:** `googleapis` SDK will be added in Phase 2 for Gmail and Calendar API calls
 
 ## Hosting
 

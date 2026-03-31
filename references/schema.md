@@ -15,7 +15,7 @@ CREATE TABLE email_sources (
   sender_name     TEXT,
   message_count   INTEGER NOT NULL DEFAULT 0,
   category_breakdown JSONB,
-    -- Example: {"promotions": 42, "receipts": 7, "newsletters": 15}
+    -- Example: {"promo": 42, "transactional": 7, "work": 3, "personal": 2, "newsletter": 15, "system": 5}
   last_analyzed   TIMESTAMPTZ,
   unsubscribe_vector BOOLEAN DEFAULT FALSE,
     -- TRUE if an unsubscribe mechanism was detected
