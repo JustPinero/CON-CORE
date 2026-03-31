@@ -66,3 +66,28 @@ export async function batchCreateEvents(
     return { data: null, error: 'Network error', meta: {} }
   }
 }
+
+interface Conflict {
+  proposed: { summary: string; start: string; end: string }
+  existing: { summary: string; start: string; end: string }
+}
+
+export async function checkConflicts(
+  events: { summary: string; start: string; end: string }[],
+  calendarId = 'primary',
+): Promise<ApiResponse<{ conflicts: Conflict[]; hasConflicts: boolean }>> {
+  try {
+    const res = await fetch('/api/calendar/conflicts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ events, calendarId }),
+    })
+    const json = await res.json()
+    if (!res.ok) return { data: null, error: json.error || 'Conflict check failed', meta: {} }
+    return json
+  } catch {
+    return { data: null, error: 'Network error', meta: {} }
+  }
+}
+
+export type { Conflict }

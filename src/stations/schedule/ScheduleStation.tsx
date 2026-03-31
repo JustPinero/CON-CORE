@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback } from 'react'
 import Shell from '../../components/Shell'
 import RetroButton from '../../components/RetroButton'
 import TemplateEditor from './TemplateEditor'
+import DeploySchedule from './DeploySchedule'
 import { getTemplates, createTemplate, updateTemplate, deleteTemplate } from '../../services/schedule'
 import type { ScheduleTemplate } from '../../utils/types'
 
-type ViewState = 'list' | 'create' | 'edit'
+type ViewState = 'list' | 'create' | 'edit' | 'deploy'
 
 export default function ScheduleStation() {
   const [templates, setTemplates] = useState<ScheduleTemplate[]>([])
@@ -59,6 +60,18 @@ export default function ScheduleStation() {
     loadTemplates()
   }
 
+  function handleStatusChange(message: string) {
+    setStatusMessage(message)
+  }
+
+  if (viewState === 'deploy') {
+    return (
+      <Shell stationName="SCHEDULE" statusMessage={statusMessage}>
+        <DeploySchedule templates={templates} onStatusChange={handleStatusChange} onBack={() => setViewState('list')} />
+      </Shell>
+    )
+  }
+
   if (viewState === 'create') {
     return (
       <Shell stationName="SCHEDULE" statusMessage={statusMessage}>
@@ -80,9 +93,14 @@ export default function ScheduleStation() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ textTransform: 'uppercase', fontSize: '14px' }}>SCHEDULE TEMPLATES</span>
-          <RetroButton onClick={() => setViewState('create')} style={{ minHeight: '32px', fontSize: '12px' }}>
-            + NEW TEMPLATE
-          </RetroButton>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <RetroButton onClick={() => setViewState('deploy')} style={{ minHeight: '32px', fontSize: '12px' }}>
+              DEPLOY SCHEDULE
+            </RetroButton>
+            <RetroButton onClick={() => setViewState('create')} style={{ minHeight: '32px', fontSize: '12px' }}>
+              + NEW TEMPLATE
+            </RetroButton>
+          </div>
         </div>
 
         {templates.length === 0 ? (
