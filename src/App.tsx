@@ -5,6 +5,7 @@ import Shell from './components/Shell'
 import StationPlaceholder from './components/StationPlaceholder'
 import BootSequence, { SESSION_KEY } from './components/BootSequence'
 import TerminalStation from './stations/terminal/TerminalStation'
+import CommsStation from './stations/comms/CommsStation'
 import { STATIONS } from './utils/types'
 
 function StationRoute() {
@@ -12,6 +13,10 @@ function StationRoute() {
 
   if (stationId === 'terminal') {
     return <TerminalStation />
+  }
+
+  if (stationId === 'comms') {
+    return <CommsStation />
   }
 
   const station = STATIONS.find((s) => s.id === stationId)
