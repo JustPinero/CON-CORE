@@ -99,7 +99,7 @@ Every bookmark must be assigned to exactly one vault.`,
     const vaults = Array.from(vaultMap.entries()).map(([name, bookmarks]) => ({
       name,
       bookmarks: bookmarks.map((b, i) => ({
-        id: `bm-${name.toLowerCase().replace(/\s+/g, '-')}-${i}`,
+        id: `bm-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}-${i}`,
         url: b.url,
         title: b.title,
         vault: name,
