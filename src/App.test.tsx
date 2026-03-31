@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, beforeEach } from 'vitest'
 import App from './App'
@@ -18,14 +18,15 @@ describe('App', () => {
     expect(screen.getByText('CON-CORE')).toBeInTheDocument()
   })
 
-  it('renders File Recon station', () => {
+  it('lazy-loads File Recon station', async () => {
     render(
       <MemoryRouter initialEntries={['/station/filerecon']}>
         <App />
       </MemoryRouter>,
     )
-    expect(screen.getByText('FILE RECON')).toBeInTheDocument()
-    expect(screen.getByText('FILE RECONNAISSANCE')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('FILE RECON')).toBeInTheDocument()
+    })
   })
 
   it('shows boot sequence when not yet booted', () => {

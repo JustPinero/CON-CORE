@@ -1,62 +1,37 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Routes, Route, useParams } from 'react-router-dom'
 import Homepage from './components/Homepage'
 import Shell from './components/Shell'
 import StationPlaceholder from './components/StationPlaceholder'
+import LoadingFallback from './components/LoadingFallback'
 import BootSequence, { SESSION_KEY } from './components/BootSequence'
-import TerminalStation from './stations/terminal/TerminalStation'
-import CommsStation from './stations/comms/CommsStation'
-import ScheduleStation from './stations/schedule/ScheduleStation'
-import SubscrStation from './stations/subscriptions/SubscrStation'
-import ResearchStation from './stations/research/ResearchStation'
-import SecurityStation from './stations/security/SecurityStation'
-import ContactsStation from './stations/contacts/ContactsStation'
-import FileReconStation from './stations/filerecon/FileReconStation'
-import TaskQueueStation from './stations/taskqueue/TaskQueueStation'
-import { STATIONS } from './utils/types'
+import type { StationId } from './utils/types'
+
+const stationModules: Record<StationId, React.LazyExoticComponent<React.ComponentType>> = {
+  terminal: lazy(() => import('./stations/terminal/TerminalStation')),
+  comms: lazy(() => import('./stations/comms/CommsStation')),
+  schedule: lazy(() => import('./stations/schedule/ScheduleStation')),
+  subscriptions: lazy(() => import('./stations/subscriptions/SubscrStation')),
+  research: lazy(() => import('./stations/research/ResearchStation')),
+  security: lazy(() => import('./stations/security/SecurityStation')),
+  contacts: lazy(() => import('./stations/contacts/ContactsStation')),
+  filerecon: lazy(() => import('./stations/filerecon/FileReconStation')),
+  taskqueue: lazy(() => import('./stations/taskqueue/TaskQueueStation')),
+}
 
 function StationRoute() {
   const { stationId } = useParams<{ stationId: string }>()
+  const StationComponent = stationModules[stationId as StationId]
 
-  if (stationId === 'terminal') {
-    return <TerminalStation />
+  if (StationComponent) {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <StationComponent />
+      </Suspense>
+    )
   }
 
-  if (stationId === 'comms') {
-    return <CommsStation />
-  }
-
-  if (stationId === 'schedule') {
-    return <ScheduleStation />
-  }
-
-  if (stationId === 'subscriptions') {
-    return <SubscrStation />
-  }
-
-  if (stationId === 'research') {
-    return <ResearchStation />
-  }
-
-  if (stationId === 'security') {
-    return <SecurityStation />
-  }
-
-  if (stationId === 'contacts') {
-    return <ContactsStation />
-  }
-
-  if (stationId === 'filerecon') {
-    return <FileReconStation />
-  }
-
-  if (stationId === 'taskqueue') {
-    return <TaskQueueStation />
-  }
-
-  const station = STATIONS.find((s) => s.id === stationId)
-  const name = station ? station.name : 'UNKNOWN'
-
+  const name = stationId?.toUpperCase() || 'UNKNOWN'
   return (
     <Shell stationName={name}>
       <StationPlaceholder />
