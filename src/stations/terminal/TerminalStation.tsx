@@ -5,6 +5,8 @@ import TerminalOutput, { type OutputLine } from './TerminalOutput'
 import { parseInput, getCommand } from './CommandRegistry'
 import './HelpSystem' // Side-effect: registers help command
 import '../comms/comms.commands' // Side-effect: registers comms commands
+import '../schedule/schedule.commands' // Side-effect: registers schedule commands
+import '../subscriptions/subscr.commands' // Side-effect: registers subscription commands
 
 export default function TerminalStation() {
   const [lines, setLines] = useState<OutputLine[]>([
