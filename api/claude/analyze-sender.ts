@@ -3,7 +3,10 @@ import { handleCors } from '../_utils/cors'
 import { success, error, methodNotAllowed } from '../_utils/response'
 import { validateEnv } from '../_utils/env'
 import { getGmailClient } from '../_utils/gmail-client'
+import { getSupabaseAdmin } from '../_utils/supabase'
 import { getClaudeClient, stripCodeFences, CLAUDE_MODEL, CLAUDE_TIMEOUT } from '../_utils/claude-client'
+
+const CACHE_TTL_DAYS = 7
 
 interface CategoryBreakdown {
   promo: number
@@ -31,9 +34,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     validateEnv()
 
-    const { senderAddress } = req.body || {}
+    const { senderAddress, forceRefresh } = req.body || {}
     if (!senderAddress || typeof senderAddress !== 'string') {
       return error(res, 400, 'Missing required field: senderAddress')
+    }
+
+    // Check cache first (unless force refresh)
+    if (!forceRefresh) {
+      const supabase = getSupabaseAdmin()
+      const { data: cached } = await supabase
+        .from('email_sources')
+        .select('category_breakdown, dossier_summary, last_analyzed, message_count')
+        .eq('sender_address', senderAddress)
+        .single()
+
+      if (cached?.last_analyzed) {
+        const ageMs = Date.now() - new Date(cached.last_analyzed).getTime()
+        const ageDays = ageMs / (1000 * 60 * 60 * 24)
+        if (ageDays < CACHE_TTL_DAYS) {
+          return success(
+            res,
+            {
+              senderAddress,
+              categoryBreakdown: cached.category_breakdown,
+              dossier: cached.dossier_summary,
+              sampledMessages: cached.message_count || 0,
+            },
+            { cached: true },
+          )
+        }
+      }
     }
 
     // Fetch sample messages from this sender
@@ -148,6 +178,20 @@ Percentages must sum to 100.`,
     ) {
       return error(res, 502, 'Invalid category breakdown structure from Claude')
     }
+
+    // Cache result in Supabase
+    const supabase = getSupabaseAdmin()
+    await supabase.from('email_sources').upsert(
+      {
+        sender_address: senderAddress,
+        category_breakdown: breakdown,
+        dossier_summary: parsed.dossier || 'UNKNOWN SENDER',
+        last_analyzed: new Date().toISOString(),
+        message_count: subjects.length,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'sender_address' },
+    )
 
     return success(res, {
       senderAddress,
