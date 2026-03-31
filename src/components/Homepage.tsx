@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { STATIONS } from '../utils/types'
+import { useAuth } from '../hooks/useAuth'
 import RetroButton from './RetroButton'
 
 export default function Homepage() {
   const navigate = useNavigate()
+  const { isAuthenticated, login } = useAuth()
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -20,13 +22,40 @@ export default function Homepage() {
   }, [navigate])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '64px' }}>
-      <h1 className="glow" style={{ fontSize: '28px', marginBottom: 'var(--space-1)', letterSpacing: '0.15em' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        paddingTop: '64px',
+      }}
+    >
+      <h1
+        className="glow"
+        style={{ fontSize: '28px', marginBottom: 'var(--space-1)', letterSpacing: '0.15em' }}
+      >
         CON-CORE
       </h1>
-      <p style={{ color: 'var(--crt-secondary)', marginBottom: 'var(--space-4)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+      <p
+        style={{
+          color: 'var(--crt-secondary)',
+          marginBottom: 'var(--space-3)',
+          fontSize: '12px',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+        }}
+      >
         CONSOLIDATED OPERATIONS CORE
       </p>
+
+      {!isAuthenticated && (
+        <div style={{ marginBottom: 'var(--space-3)' }}>
+          <RetroButton onClick={login} style={{ minHeight: '48px', padding: '8px 32px' }}>
+            LOGIN WITH GOOGLE
+          </RetroButton>
+        </div>
+      )}
+
       <div
         style={{
           display: 'grid',
@@ -48,7 +77,9 @@ export default function Homepage() {
             }}
           >
             <span>{station.name}</span>
-            <span style={{ fontSize: '11px', color: 'var(--crt-tertiary)' }}>[{station.fkey}]</span>
+            <span style={{ fontSize: '11px', color: 'var(--crt-tertiary)' }}>
+              [{station.fkey}]
+            </span>
           </RetroButton>
         ))}
       </div>
