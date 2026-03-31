@@ -18,14 +18,14 @@ describe('App', () => {
     expect(screen.getByText('CON-CORE')).toBeInTheDocument()
   })
 
-  it('renders station shell with STATION OFFLINE placeholder for unbuilt stations', () => {
+  it('renders File Recon station', () => {
     render(
       <MemoryRouter initialEntries={['/station/filerecon']}>
         <App />
       </MemoryRouter>,
     )
     expect(screen.getByText('FILE RECON')).toBeInTheDocument()
-    expect(screen.getByText('STATION OFFLINE')).toBeInTheDocument()
+    expect(screen.getByText('FILE RECONNAISSANCE')).toBeInTheDocument()
   })
 
   it('shows boot sequence when not yet booted', () => {

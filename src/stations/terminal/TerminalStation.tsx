@@ -10,6 +10,8 @@ import '../subscriptions/subscr.commands' // Side-effect: registers subscription
 import '../research/research.commands' // Side-effect: registers research commands
 import '../security/security.commands' // Side-effect: registers security commands
 import '../contacts/contacts.commands' // Side-effect: registers contacts commands
+import '../filerecon/filerecon.commands' // Side-effect: registers file recon commands
+import '../taskqueue/taskqueue.commands' // Side-effect: registers task queue commands
 
 export default function TerminalStation() {
   const [lines, setLines] = useState<OutputLine[]>([

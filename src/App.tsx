@@ -11,6 +11,8 @@ import SubscrStation from './stations/subscriptions/SubscrStation'
 import ResearchStation from './stations/research/ResearchStation'
 import SecurityStation from './stations/security/SecurityStation'
 import ContactsStation from './stations/contacts/ContactsStation'
+import FileReconStation from './stations/filerecon/FileReconStation'
+import TaskQueueStation from './stations/taskqueue/TaskQueueStation'
 import { STATIONS } from './utils/types'
 
 function StationRoute() {
@@ -42,6 +44,14 @@ function StationRoute() {
 
   if (stationId === 'contacts') {
     return <ContactsStation />
+  }
+
+  if (stationId === 'filerecon') {
+    return <FileReconStation />
+  }
+
+  if (stationId === 'taskqueue') {
+    return <TaskQueueStation />
   }
 
   const station = STATIONS.find((s) => s.id === stationId)
