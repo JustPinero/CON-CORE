@@ -1,5 +1,5 @@
 import { google } from 'googleapis'
-import { getOAuth2Client } from './google-auth'
+import { OAuth2Client } from 'google-auth-library'
 import { decrypt } from './crypto'
 import { getSupabaseAdmin } from './supabase'
 
@@ -19,7 +19,11 @@ export async function getGmailClient() {
   const accessToken = decrypt(tokenRow.access_token_encrypted)
   const refreshToken = decrypt(tokenRow.refresh_token_encrypted)
 
-  const client = getOAuth2Client()
+  // Fresh client per request to avoid credential leaks across concurrent requests
+  const clientId = process.env.GOOGLE_CLIENT_ID
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI
+  const client = new OAuth2Client(clientId, clientSecret, redirectUri)
   client.setCredentials({
     access_token: accessToken,
     refresh_token: refreshToken,

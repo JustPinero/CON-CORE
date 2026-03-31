@@ -74,14 +74,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // If action === 'execute', attempt to follow the unsubscribe URL
     if (action === 'execute' && unsubUrl.startsWith('http')) {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 10000)
-      try {
-        await fetch(unsubUrl, { signal: controller.signal })
-      } catch {
-        // Best-effort — many unsubscribe URLs just need to be hit
-      } finally {
-        clearTimeout(timeout)
+      // SSRF protection: only allow public HTTPS URLs
+      const parsed = new URL(unsubUrl)
+      const blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '169.254.169.254', '[::1]']
+      const isBlocked =
+        blockedHosts.includes(parsed.hostname) ||
+        parsed.hostname.endsWith('.local') ||
+        parsed.hostname.startsWith('10.') ||
+        parsed.hostname.startsWith('192.168.') ||
+        parsed.hostname.match(/^172\.(1[6-9]|2\d|3[01])\./)
+
+      if (!isBlocked && parsed.protocol === 'https:') {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 10000)
+        try {
+          await fetch(unsubUrl, { signal: controller.signal, redirect: 'follow' })
+        } catch {
+          // Best-effort — many unsubscribe URLs just need to be hit
+        } finally {
+          clearTimeout(timeout)
+        }
       }
     }
 

@@ -47,23 +47,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Batch archive (remove INBOX label) in chunks
     let archived = 0
+    let failed = 0
     for (let i = 0; i < messageIds.length; i += BATCH_SIZE) {
       const batch = messageIds.slice(i, i + BATCH_SIZE)
-      await gmail.users.messages.batchModify({
-        userId: 'me',
-        requestBody: {
-          ids: batch,
-          removeLabelIds: ['INBOX'],
-        },
-      })
-      archived += batch.length
+      try {
+        await gmail.users.messages.batchModify({
+          userId: 'me',
+          requestBody: {
+            ids: batch,
+            removeLabelIds: ['INBOX'],
+          },
+        })
+        archived += batch.length
+      } catch {
+        failed += batch.length
+      }
 
       if (i + BATCH_SIZE < messageIds.length) {
         await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY))
       }
     }
 
-    return success(res, { archived }, { senderAddress })
+    return success(res, { archived, failed }, { senderAddress })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Batch archive failed'
     if (message.includes('invalid_grant') || message.includes('Token has been expired')) {

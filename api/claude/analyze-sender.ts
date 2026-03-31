@@ -34,7 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     validateEnv()
 
-    const { senderAddress, forceRefresh } = req.body || {}
+    const { senderAddress, senderName, forceRefresh } = req.body || {}
     if (!senderAddress || typeof senderAddress !== 'string') {
       return error(res, 400, 'Missing required field: senderAddress')
     }
@@ -184,6 +184,7 @@ Percentages must sum to 100.`,
     await supabase.from('email_sources').upsert(
       {
         sender_address: senderAddress,
+        sender_name: senderName || senderAddress,
         category_breakdown: breakdown,
         dossier_summary: parsed.dossier || 'UNKNOWN SENDER',
         last_analyzed: new Date().toISOString(),

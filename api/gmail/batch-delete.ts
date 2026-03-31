@@ -47,20 +47,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Batch delete in chunks
     let deleted = 0
+    let failed = 0
     for (let i = 0; i < messageIds.length; i += BATCH_SIZE) {
       const batch = messageIds.slice(i, i + BATCH_SIZE)
-      await gmail.users.messages.batchDelete({
-        userId: 'me',
-        requestBody: { ids: batch },
-      })
-      deleted += batch.length
+      try {
+        await gmail.users.messages.batchDelete({
+          userId: 'me',
+          requestBody: { ids: batch },
+        })
+        deleted += batch.length
+      } catch {
+        failed += batch.length
+      }
 
       if (i + BATCH_SIZE < messageIds.length) {
         await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY))
       }
     }
 
-    return success(res, { deleted }, { senderAddress })
+    return success(res, { deleted, failed }, { senderAddress })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Batch delete failed'
     if (message.includes('invalid_grant') || message.includes('Token has been expired')) {

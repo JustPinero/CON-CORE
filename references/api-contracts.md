@@ -6,7 +6,7 @@ All routes are Vercel Serverless Functions in the `/api` directory. All response
 interface ApiResponse<T> {
   data: T | null;
   error: string | null;
-  meta?: { count?: number; page?: number; cached?: boolean };
+  meta?: { totalSenders?: number; pagesScanned?: number; truncated?: boolean; cached?: boolean };
 }
 ```
 
@@ -60,34 +60,47 @@ Refresh the Google OAuth2 access token using the stored refresh token.
 
 ---
 
+### GET /api/auth/status
+
+Check whether a valid (non-expired) token exists in `auth_tokens`.
+
+- **Auth required:** No
+- **Request body:** None
+- **Query params:** None
+- **Response:**
+```json
+{
+  "data": {
+    "authenticated": true,
+    "tokenExpired": false
+  },
+  "error": null
+}
+```
+  - `tokenExpired` is only present when `authenticated` is `true`
+
+---
+
 ## Gmail Routes
 
 ### GET /api/gmail/senders
 
-List unique senders with message counts and category breakdowns.
+List unique senders with message counts, aggregated by scanning inbox pages.
 
 - **Auth required:** Yes
-- **Query params:**
-  - `limit` (number, optional, default 50)
-  - `offset` (number, optional, default 0)
-  - `sort` (string, optional: "count" | "name" | "last_analyzed", default "count")
+- **Query params:** None
 - **Response:**
 ```json
 {
   "data": [
     {
-      "id": "uuid",
       "senderAddress": "noreply@example.com",
       "senderName": "Example Co",
-      "messageCount": 142,
-      "categoryBreakdown": { "promo": 100, "transactional": 42 },
-      "lastAnalyzed": "2026-03-30T10:00:00Z",
-      "unsubscribeVector": true,
-      "dossierSummary": "E-commerce retailer..."
+      "messageCount": 142
     }
   ],
   "error": null,
-  "meta": { "count": 237 }
+  "meta": { "totalSenders": 237, "pagesScanned": 4, "truncated": false }
 }
 ```
 
@@ -95,59 +108,7 @@ List unique senders with message counts and category breakdowns.
 
 ### POST /api/gmail/batch-delete
 
-Batch delete emails by sender and optional category filter.
-
-- **Auth required:** Yes
-- **Request body:**
-```json
-{
-  "senderAddress": "noreply@example.com",
-  "category": "promotions",
-  "olderThanDays": 30
-}
-```
-- **Response:**
-```json
-{
-  "data": {
-    "deletedCount": 87,
-    "senderAddress": "noreply@example.com"
-  },
-  "error": null
-}
-```
-
----
-
-### POST /api/gmail/batch-archive
-
-Batch archive emails by sender and optional category filter.
-
-- **Auth required:** Yes
-- **Request body:**
-```json
-{
-  "senderAddress": "noreply@example.com",
-  "category": "newsletters",
-  "olderThanDays": 7
-}
-```
-- **Response:**
-```json
-{
-  "data": {
-    "archivedCount": 23,
-    "senderAddress": "noreply@example.com"
-  },
-  "error": null
-}
-```
-
----
-
-### POST /api/gmail/unsubscribe
-
-Execute unsubscribe action for a given sender.
+Batch delete all emails from a given sender.
 
 - **Auth required:** Yes
 - **Request body:**
@@ -160,13 +121,64 @@ Execute unsubscribe action for a given sender.
 ```json
 {
   "data": {
-    "success": true,
-    "method": "list-unsubscribe-header",
-    "senderAddress": "noreply@example.com"
+    "deleted": 87,
+    "failed": 0
   },
   "error": null
 }
 ```
+
+---
+
+### POST /api/gmail/batch-archive
+
+Batch archive (remove from INBOX) all emails from a given sender.
+
+- **Auth required:** Yes
+- **Request body:**
+```json
+{
+  "senderAddress": "noreply@example.com"
+}
+```
+- **Response:**
+```json
+{
+  "data": {
+    "archived": 23,
+    "failed": 0
+  },
+  "error": null
+}
+```
+
+---
+
+### POST /api/gmail/unsubscribe
+
+Check for a `List-Unsubscribe` header on the sender's most recent message, and optionally follow the unsubscribe URL.
+
+- **Auth required:** Yes
+- **Request body:**
+```json
+{
+  "senderAddress": "noreply@example.com",
+  "action": "execute"
+}
+```
+  - `action` (string, optional) — pass `"execute"` to follow the unsubscribe URL server-side
+- **Response:**
+```json
+{
+  "data": {
+    "hasUnsubscribe": true,
+    "unsubscribeUrl": "https://example.com/unsub?token=abc",
+    "executed": true
+  },
+  "error": null
+}
+```
+  - `executed` is only present when `action: "execute"` was passed
 
 ---
 
@@ -268,30 +280,38 @@ Check for scheduling conflicts before batch creation.
 
 ### POST /api/claude/analyze-sender
 
-Use Claude to categorize a sender's emails.
+Fetch a sample of a sender's email subjects, send them to Claude for categorization, and cache the result. Returns from cache if analyzed within the last 7 days.
 
 - **Auth required:** Yes
 - **Request body:**
 ```json
 {
   "senderAddress": "noreply@example.com",
-  "sampleSubjects": ["Your order has shipped", "Sale: 50% off today"],
-  "sampleCount": 142
+  "forceRefresh": false
 }
 ```
+  - `forceRefresh` (boolean, optional) — bypass the 7-day cache and re-analyze
 - **Response:**
 ```json
 {
   "data": {
     "senderAddress": "noreply@example.com",
-    "categoryBreakdown": { "promo": 100, "transactional": 42 },
-    "dossierSummary": "E-commerce retailer sending promotional offers and order confirmations.",
-    "unsubscribeVector": true
+    "categoryBreakdown": {
+      "promo": 70,
+      "transactional": 20,
+      "work": 0,
+      "personal": 0,
+      "newsletter": 10,
+      "system": 0
+    },
+    "dossier": "RETAIL ELECTRONICS PROMOTIONS — WEEKLY DEALS",
+    "sampledMessages": 20
   },
   "error": null,
-  "meta": { "cached": false }
+  "meta": { "cached": true }
 }
 ```
+  - `meta.cached` is only present (and `true`) when the result was served from cache
 
 ---
 

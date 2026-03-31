@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PieChart, { type PieSlice } from '../../components/PieChart'
 import ActionButtons, { type ActionButton } from '../../components/ActionButtons'
 import { analyzeSender, type AnalysisResponse } from '../../services/claude'
@@ -18,13 +18,14 @@ export default function SourceIntel({ sender, onStatusChange, onSenderUpdated }:
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [viewState, setViewState] = useState<ViewState>('loading')
   const [resultMessage, setResultMessage] = useState('')
-  const [loading, setLoading] = useState(false)
 
-  // Auto-analyze on mount via key change (parent should key this component by sender)
-  if (viewState === 'loading' && !loading) {
-    setLoading(true)
+  // Auto-analyze on mount (parent keys this component by sender address)
+  useEffect(() => {
+    let cancelled = false
     onStatusChange(`ANALYZING ${sender.senderName}...`, 'processing')
-    analyzeSender(sender.senderAddress).then((result) => {
+
+    analyzeSender(sender.senderAddress, sender.senderName).then((result) => {
+      if (cancelled) return
       if (result.data) {
         setAnalysis(result.data)
         setViewState('chart')
@@ -33,9 +34,12 @@ export default function SourceIntel({ sender, onStatusChange, onSenderUpdated }:
         onStatusChange(`ERROR: ${result.error}`, 'error')
         setViewState('chart')
       }
-      setLoading(false)
     })
-  }
+
+    return () => {
+      cancelled = true
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSliceClick(key: string) {
     setSelectedCategory(key)
@@ -48,12 +52,12 @@ export default function SourceIntel({ sender, onStatusChange, onSenderUpdated }:
     if (result.data) {
       setResultMessage(`${result.data.deleted} EMAILS DELETED`)
       onStatusChange(`${result.data.deleted} EMAILS DELETED`, 'ready')
+      onSenderUpdated()
     } else {
       setResultMessage(`ERROR: ${result.error}`)
       onStatusChange(`ERROR: ${result.error}`, 'error')
     }
     setViewState('result')
-    onSenderUpdated()
   }
 
   async function handleArchive() {
@@ -62,12 +66,12 @@ export default function SourceIntel({ sender, onStatusChange, onSenderUpdated }:
     if (result.data) {
       setResultMessage(`${result.data.archived} EMAILS ARCHIVED`)
       onStatusChange(`${result.data.archived} EMAILS ARCHIVED`, 'ready')
+      onSenderUpdated()
     } else {
       setResultMessage(`ERROR: ${result.error}`)
       onStatusChange(`ERROR: ${result.error}`, 'error')
     }
     setViewState('result')
-    onSenderUpdated()
   }
 
   function handleCancel() {

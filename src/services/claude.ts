@@ -11,6 +11,7 @@ interface AnalysisResponse {
 
 export async function analyzeSender(
   senderAddress: string,
+  senderName?: string,
 ): Promise<ApiResponse<AnalysisResponse>> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
@@ -19,7 +20,7 @@ export async function analyzeSender(
     const res = await fetch('/api/claude/analyze-sender', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ senderAddress }),
+      body: JSON.stringify({ senderAddress, senderName }),
       signal: controller.signal,
     })
     clearTimeout(timeout)
