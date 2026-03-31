@@ -71,6 +71,8 @@ CREATE TABLE bookmark_vaults (
 );
 ```
 
+> **Phase 4 implementation note:** Bookmarks are currently held in React component state after Claude categorization. Bookmark IDs are generated server-side (not UUIDs). Field naming uses camelCase in code vs snake_case in schema. Supabase persistence planned for a future phase.
+
 ---
 
 ## bookmarks
@@ -94,6 +96,8 @@ CREATE TABLE bookmarks (
 CREATE INDEX idx_bookmarks_vault_id ON bookmarks(vault_id);
 CREATE INDEX idx_bookmarks_status ON bookmarks(status);
 ```
+
+> **Phase 4 implementation note:** Bookmarks are currently held in React component state after Claude categorization. Bookmark IDs are generated server-side (not UUIDs). Field naming uses camelCase in code vs snake_case in schema. Supabase persistence planned for a future phase.
 
 ---
 

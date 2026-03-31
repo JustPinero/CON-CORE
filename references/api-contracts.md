@@ -330,14 +330,22 @@ Use Claude to categorize a list of bookmarks.
 - **Response:**
 ```json
 {
-  "data": {
-    "categorized": [
-      { "url": "https://example.com/article", "title": "How to do X", "category": "tutorials" },
-      { "url": "https://example.com/tool", "title": "Cool dev tool", "category": "dev-tools" }
-    ],
-    "categoryList": ["tutorials", "dev-tools"]
-  },
-  "error": null
+  "data": [
+    {
+      "name": "tutorials",
+      "bookmarks": [
+        { "id": 1, "url": "https://example.com/article", "title": "How to do X", "vault": "tutorials", "status": "alive", "dupeCount": 0 }
+      ]
+    },
+    {
+      "name": "dev-tools",
+      "bookmarks": [
+        { "id": 2, "url": "https://example.com/tool", "title": "Cool dev tool", "vault": "dev-tools", "status": "alive", "dupeCount": 0 }
+      ]
+    }
+  ],
+  "error": null,
+  "meta": { "totalBookmarks": 2, "vaultCount": 2, "chunksProcessed": 1 }
 }
 ```
 
