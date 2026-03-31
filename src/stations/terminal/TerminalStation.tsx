@@ -7,6 +7,7 @@ import './HelpSystem' // Side-effect: registers help command
 import '../comms/comms.commands' // Side-effect: registers comms commands
 import '../schedule/schedule.commands' // Side-effect: registers schedule commands
 import '../subscriptions/subscr.commands' // Side-effect: registers subscription commands
+import '../research/research.commands' // Side-effect: registers research commands
 
 export default function TerminalStation() {
   const [lines, setLines] = useState<OutputLine[]>([
