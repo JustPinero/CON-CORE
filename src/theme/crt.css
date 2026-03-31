@@ -1,0 +1,223 @@
+/* CON-CORE CRT Design System */
+
+:root {
+  --crt-primary: #33ff33;
+  --crt-secondary: #22aa22;
+  --crt-tertiary: #1a661a;
+  --crt-bg: #0a1a0a;
+  --crt-bg-light: #0d220d;
+  --crt-danger: #ff5555;
+  --crt-warning: #ffaa00;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+}
+
+/* === RESET + BASE === */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--crt-bg);
+  color: var(--crt-primary);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+}
+
+#root {
+  min-height: 100%;
+  position: relative;
+}
+
+/* === SCANLINE OVERLAY === */
+
+#root::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* === TYPOGRAPHY === */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+th,
+button,
+[role='heading'] {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: normal;
+}
+
+a {
+  color: var(--crt-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--crt-primary);
+  text-shadow:
+    0 0 5px #33ff33,
+    0 0 10px rgba(34, 170, 34, 0.4);
+}
+
+::selection {
+  background: var(--crt-primary);
+  color: var(--crt-bg);
+}
+
+/* === GLOW UTILITIES === */
+
+.glow {
+  text-shadow:
+    0 0 5px #33ff33,
+    0 0 10px rgba(34, 170, 34, 0.4);
+}
+
+.focused-glow {
+  box-shadow: 0 0 5px rgba(51, 255, 51, 0.3);
+}
+
+/* === CURSOR BLINK === */
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor {
+  animation: blink 1.06s step-end infinite;
+}
+
+/* === SCROLLBAR === */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--crt-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--crt-tertiary);
+  border: 1px solid var(--crt-bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--crt-secondary);
+}
+
+/* === FORM ELEMENTS === */
+
+input,
+textarea,
+select {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  color: var(--crt-primary);
+  background: var(--crt-bg-light);
+  border: 1px solid var(--crt-primary);
+  border-radius: 0;
+  padding: var(--space-1) var(--space-2);
+  outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 5px rgba(51, 255, 51, 0.3);
+  text-shadow:
+    0 0 5px #33ff33,
+    0 0 10px rgba(34, 170, 34, 0.4);
+}
+
+/* === RETRO BUTTON === */
+
+.retro-button {
+  background: transparent;
+  color: var(--crt-primary);
+  border: 2px solid var(--crt-primary);
+  padding: var(--space-1) var(--space-2);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  min-height: 40px;
+  border-radius: 0;
+}
+
+.retro-button:hover {
+  color: #33ff33;
+  text-shadow:
+    0 0 5px #33ff33,
+    0 0 10px rgba(34, 170, 34, 0.4);
+  border-color: #33ff33;
+}
+
+.retro-button:active,
+.retro-button.active {
+  background: var(--crt-primary);
+  color: var(--crt-bg);
+  text-shadow: none;
+}
+
+.retro-button:disabled {
+  color: var(--crt-tertiary);
+  border-color: var(--crt-tertiary);
+  cursor: not-allowed;
+  text-shadow: none;
+}
+
+.retro-button--danger {
+  color: var(--crt-danger);
+  border-color: var(--crt-danger);
+}
+
+.retro-button--danger:hover {
+  text-shadow: 0 0 5px #ff5555;
+  border-color: #ff5555;
+}
+
+.retro-button--danger:active {
+  background: var(--crt-danger);
+  color: var(--crt-bg);
+}
