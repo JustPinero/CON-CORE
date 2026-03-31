@@ -35,7 +35,7 @@ export function parseCsvContacts(text: string): ContactRecord[] {
   const headers = lines[0].split(',').map((h) => h.replace(/^"?|"?$/g, '').toLowerCase().trim())
 
   return lines.slice(1).map((line, i) => {
-    const values = line.split(',').map((v) => v.replace(/^"?|"?$/g, '').trim())
+    const values = parseCsvLine(line)
     const row: Record<string, string> = {}
     headers.forEach((h, j) => {
       row[h] = values[j] || ''
@@ -50,6 +50,25 @@ export function parseCsvContacts(text: string): ContactRecord[] {
       duplicateGroupId: null,
     }
   })
+}
+
+function parseCsvLine(line: string): string[] {
+  const values: string[] = []
+  let current = ''
+  let inQuotes = false
+
+  for (const char of line) {
+    if (char === '"') {
+      inQuotes = !inQuotes
+    } else if (char === ',' && !inQuotes) {
+      values.push(current.trim())
+      current = ''
+    } else {
+      current += char
+    }
+  }
+  values.push(current.trim())
+  return values
 }
 
 export function mergeContacts(
