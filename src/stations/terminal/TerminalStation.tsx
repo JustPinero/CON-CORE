@@ -8,6 +8,8 @@ import '../comms/comms.commands' // Side-effect: registers comms commands
 import '../schedule/schedule.commands' // Side-effect: registers schedule commands
 import '../subscriptions/subscr.commands' // Side-effect: registers subscription commands
 import '../research/research.commands' // Side-effect: registers research commands
+import '../security/security.commands' // Side-effect: registers security commands
+import '../contacts/contacts.commands' // Side-effect: registers contacts commands
 
 export default function TerminalStation() {
   const [lines, setLines] = useState<OutputLine[]>([

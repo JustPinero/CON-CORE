@@ -377,38 +377,38 @@ Use Claude to find recurring subscriptions in email receipts.
 
 ### POST /api/claude/audit-passwords
 
-Analyze a password CSV for reuse, weakness, and age. Response only — results are NEVER stored in the database.
+Analyze a list of account passwords for reuse and weakness. Response only — results are NEVER stored in the database.
 
 - **Auth required:** Yes
 - **Request body:**
 ```json
 {
-  "entries": [
-    { "site": "example.com", "username": "user@email.com", "passwordHash": "sha256-of-password", "lastChanged": "2024-01-01" }
+  "records": [
+    { "accountName": "Example", "password": "hunter2" }
   ]
 }
 ```
+  - `records` (array, required) — each item: `accountName` (string), `password` (string)
 - **Response:**
 ```json
 {
-  "data": {
-    "totalEntries": 150,
-    "reuseGroups": [
-      { "sites": ["example.com", "another.com"], "riskLevel": "critical" }
-    ],
-    "weakPasswords": [
-      { "site": "example.com", "reason": "common-pattern" }
-    ],
-    "stalePasswords": [
-      { "site": "example.com", "lastChanged": "2024-01-01", "ageDays": 820 }
-    ],
-    "overallScore": 42
-  },
-  "error": null
+  "data": [
+    {
+      "accountName": "Example",
+      "threatLevel": "red",
+      "issues": ["reused password", "common dictionary word"],
+      "recommendation": "Replace with a unique, randomly generated password."
+    }
+  ],
+  "error": null,
+  "meta": { "audited": 1 }
 }
 ```
+  - `data` — array, one entry per input record
+  - `threatLevel` — `"green"` | `"yellow"` | `"red"`
+  - `meta.audited` — count of records analyzed
 
-**Security note:** Raw passwords never leave the client. The client hashes passwords before sending. Results exist only in the API response and React state — never persisted.
+> **Security note:** Raw passwords are sent to the Claude API for reuse/weakness analysis. This is by design — hashing would prevent the analysis from working. Password data is NEVER cached in Supabase. The response is ephemeral and cleared when the user navigates away from the Security station.
 
 ---
 
@@ -450,6 +450,7 @@ Generate a daily inbox briefing summary.
 Use Claude to find duplicate contacts across sources.
 
 - **Auth required:** Yes
+- **Status:** Not yet implemented — returns `501 Not Implemented`
 - **Request body:**
 ```json
 {
@@ -459,23 +460,22 @@ Use Claude to find duplicate contacts across sources.
   ]
 }
 ```
+  - `contacts` (`ContactRecord[]`, required) — full contact records to analyze
 - **Response:**
 ```json
 {
   "data": {
-    "duplicateGroups": [
-      {
-        "groupId": "uuid",
-        "contacts": ["uuid-1", "uuid-2"],
-        "confidence": 0.92,
-        "matchReasons": ["same-phone", "similar-name"]
-      }
-    ],
-    "totalGroups": 1
+    "groups": [
+      [
+        { "id": "uuid-1", "name": "John Smith", "email": "john@example.com", "phone": "555-0100", "source": "gmail" },
+        { "id": "uuid-2", "name": "J. Smith", "email": "john.smith@work.com", "phone": "555-0100", "source": "phone" }
+      ]
+    ]
   },
   "error": null
 }
 ```
+  - `data.groups` — `ContactRecord[][]`, each inner array is a group of records Claude considers duplicates
 
 ---
 
