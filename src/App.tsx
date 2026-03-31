@@ -9,6 +9,8 @@ import CommsStation from './stations/comms/CommsStation'
 import ScheduleStation from './stations/schedule/ScheduleStation'
 import SubscrStation from './stations/subscriptions/SubscrStation'
 import ResearchStation from './stations/research/ResearchStation'
+import SecurityStation from './stations/security/SecurityStation'
+import ContactsStation from './stations/contacts/ContactsStation'
 import { STATIONS } from './utils/types'
 
 function StationRoute() {
@@ -32,6 +34,14 @@ function StationRoute() {
 
   if (stationId === 'research') {
     return <ResearchStation />
+  }
+
+  if (stationId === 'security') {
+    return <SecurityStation />
+  }
+
+  if (stationId === 'contacts') {
+    return <ContactsStation />
   }
 
   const station = STATIONS.find((s) => s.id === stationId)
