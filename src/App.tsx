@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Routes, Route, useParams } from 'react-router-dom'
 import Homepage from './components/Homepage'
 import Shell from './components/Shell'
 import StationPlaceholder from './components/StationPlaceholder'
+import BootSequence, { SESSION_KEY } from './components/BootSequence'
 import { STATIONS } from './utils/types'
 
 function StationRoute() {
@@ -17,6 +19,12 @@ function StationRoute() {
 }
 
 export default function App() {
+  const [booted, setBooted] = useState(() => sessionStorage.getItem(SESSION_KEY) === '1')
+
+  if (!booted) {
+    return <BootSequence onComplete={() => setBooted(true)} />
+  }
+
   return (
     <Routes>
       <Route path="/" element={<Homepage />} />
