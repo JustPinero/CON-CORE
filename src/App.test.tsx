@@ -13,12 +13,13 @@ describe('App', () => {
     expect(screen.getByText('CON-CORE')).toBeInTheDocument()
   })
 
-  it('renders station placeholder for station routes', () => {
+  it('renders station shell with STATION OFFLINE placeholder', () => {
     render(
       <MemoryRouter initialEntries={['/station/comms']}>
         <App />
       </MemoryRouter>,
     )
-    expect(screen.getByText('STATION PLACEHOLDER')).toBeInTheDocument()
+    expect(screen.getByText('COMMS')).toBeInTheDocument()
+    expect(screen.getByText('STATION OFFLINE')).toBeInTheDocument()
   })
 })
