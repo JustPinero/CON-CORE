@@ -57,3 +57,4 @@ registerCommand({
   usage: 'clear',
   handler: () => '__CLEAR__',
 })
+

@@ -3,6 +3,7 @@ import Shell from '../../components/Shell'
 import TerminalInput from './TerminalInput'
 import TerminalOutput, { type OutputLine } from './TerminalOutput'
 import { parseInput, getCommand } from './CommandRegistry'
+import './HelpSystem' // Side-effect: registers help command
 
 export default function TerminalStation() {
   const [lines, setLines] = useState<OutputLine[]>([
@@ -47,6 +48,13 @@ export default function TerminalStation() {
     setStatusMessage('READY')
   }, [])
 
+  const handleTabResult = useCallback((options: string[]) => {
+    setLines((prev) => [
+      ...prev,
+      { type: 'output', text: options.join('  ') },
+    ])
+  }, [])
+
   return (
     <Shell stationName="TERMINAL" statusMessage={statusMessage}>
       <div
@@ -57,7 +65,7 @@ export default function TerminalStation() {
         }}
       >
         <TerminalOutput lines={lines} />
-        <TerminalInput onSubmit={handleSubmit} history={history} />
+        <TerminalInput onSubmit={handleSubmit} onTabResult={handleTabResult} history={history} />
       </div>
     </Shell>
   )

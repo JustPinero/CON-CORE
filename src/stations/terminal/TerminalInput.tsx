@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
+import { tabComplete } from './TabComplete'
 
 interface TerminalInputProps {
   onSubmit: (input: string) => void
+  onTabResult?: (options: string[]) => void
   history: string[]
 }
 
-export default function TerminalInput({ onSubmit, history }: TerminalInputProps) {
+export default function TerminalInput({ onSubmit, onTabResult, history }: TerminalInputProps) {
   const [value, setValue] = useState('')
   const [historyIndex, setHistoryIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -19,6 +21,17 @@ export default function TerminalInput({ onSubmit, history }: TerminalInputProps)
       onSubmit(value.trim())
       setValue('')
       setHistoryIndex(-1)
+    } else if (e.key === 'Tab') {
+      e.preventDefault()
+      const result = tabComplete(value)
+      if (result.type === 'complete') {
+        setValue(result.value + ' ')
+      } else if (result.type === 'ambiguous') {
+        if (result.value.length > value.length) {
+          setValue(result.value)
+        }
+        onTabResult?.(result.options)
+      }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       const newIndex = Math.min(historyIndex + 1, history.length - 1)
