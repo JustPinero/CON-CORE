@@ -18,13 +18,13 @@ describe('App', () => {
     expect(screen.getByText('CON-CORE')).toBeInTheDocument()
   })
 
-  it('renders station shell with STATION OFFLINE placeholder', () => {
+  it('renders station shell with STATION OFFLINE placeholder for unbuilt stations', () => {
     render(
-      <MemoryRouter initialEntries={['/station/comms']}>
+      <MemoryRouter initialEntries={['/station/schedule']}>
         <App />
       </MemoryRouter>,
     )
-    expect(screen.getByText('COMMS')).toBeInTheDocument()
+    expect(screen.getByText('SCHEDULE')).toBeInTheDocument()
     expect(screen.getByText('STATION OFFLINE')).toBeInTheDocument()
   })
 
