@@ -1,0 +1,22 @@
+{
+  "flows": {
+    "boot-sequence": "not-started",
+    "homepage-navigation": "not-started",
+    "station-chrome": "not-started",
+    "google-oauth": "not-started",
+    "terminal-commands": "not-started",
+    "comms-sender-analysis": "not-started",
+    "comms-batch-operations": "not-started",
+    "comms-unsubscribe": "not-started",
+    "schedule-template-crud": "not-started",
+    "schedule-deploy": "not-started",
+    "subscription-detection": "not-started",
+    "bookmark-import-categorize": "not-started",
+    "bookmark-scan-purge": "not-started",
+    "password-audit": "not-started",
+    "contact-dedup-merge": "not-started",
+    "file-recon-scan": "not-started",
+    "task-queue-operations": "not-started",
+    "keyboard-navigation": "not-started"
+  }
+}

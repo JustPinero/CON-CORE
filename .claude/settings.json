@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostCompact": [
+      {
+        "type": "command",
+        "command": "echo 'CONTEXT RECOVERY — Project: CON-CORE. Stack: React+Vite+TS, Vercel Serverless, Supabase PostgreSQL. Re-read CLAUDE.md and current request. Check .claude/handoff.md for session state.'"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "type": "command",
+        "command": "if echo \"$TOOL_INPUT\" | grep -q 'git commit'; then STAGED=$(cd /Users/justinpinero/Desktop/projects/CON-CORE && git diff --cached --name-only 2>/dev/null); if echo \"$STAGED\" | grep -qE '\\.env$|\\.env\\.local$|credentials|secret|password'; then echo 'BLOCKED: Staged files may contain secrets. Review before committing.' && exit 1; fi; fi; exit 0"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "type": "command",
+        "command": "FILE=$(echo \"$TOOL_INPUT\" | grep -o '\"file_path\":\"[^\"]*\"' | head -1 | sed 's/\"file_path\":\"//;s/\"//'); if [ -n \"$FILE\" ] && echo \"$FILE\" | grep -qE '\\.(ts|tsx|js|jsx|css|json|md)$'; then cd /Users/justinpinero/Desktop/projects/CON-CORE && npx prettier --write \"$FILE\" 2>/dev/null; fi; exit 0"
+      },
+      {
+        "matcher": "Write|Edit",
+        "type": "command",
+        "command": "FILE=$(echo \"$TOOL_INPUT\" | grep -o '\"file_path\":\"[^\"]*\"' | head -1 | sed 's/\"file_path\":\"//;s/\"//'); if [ -n \"$FILE\" ] && echo \"$FILE\" | grep -qE '\\.(jsx|tsx)$'; then cd /Users/justinpinero/Desktop/projects/CON-CORE && npx eslint --rule '{\"jsx-a11y/alt-text\":\"warn\",\"jsx-a11y/aria-props\":\"warn\",\"jsx-a11y/role-has-required-aria-props\":\"warn\"}' \"$FILE\" 2>/dev/null; fi; exit 0"
+      }
+    ]
+  }
+}
