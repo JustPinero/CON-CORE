@@ -19,8 +19,8 @@ export async function detectSubscriptions(): Promise<ApiResponse<Subscription[]>
     if (!res.ok) return { data: null, error: json.error || 'Detection failed', meta: {} }
 
     // Map API response to our Subscription type
-    const subs: Subscription[] = (json.data || []).map((s: Record<string, unknown>, i: number) => ({
-      id: `sub-${i}`,
+    const subs: Subscription[] = (json.data || []).map((s: Record<string, unknown>) => ({
+      id: `sub-${(s.serviceName as string).toLowerCase().replace(/\s+/g, '-')}`,
       serviceName: s.serviceName as string,
       monthlyCost: s.monthlyCost as number,
       category: s.category as string,

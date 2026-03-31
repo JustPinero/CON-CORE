@@ -34,6 +34,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let failed = 0
 
     for (const event of events as EventInput[]) {
+      if (!event.summary || !event.start || !event.end) {
+        failed++
+        continue
+      }
       try {
         await calendar.events.insert({
           calendarId: event.calendarId || 'primary',

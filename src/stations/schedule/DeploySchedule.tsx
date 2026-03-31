@@ -33,6 +33,7 @@ export default function DeploySchedule({ templates, onStatusChange, onBack }: De
   const [conflicts, setConflicts] = useState<Conflict[]>([])
   const [showConflicts, setShowConflicts] = useState(false)
   const [previewEvents, setPreviewEvents] = useState<ReturnType<typeof generateEvents>>([])
+  const [isDeploying, setIsDeploying] = useState(false)
 
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId)
 
@@ -61,7 +62,8 @@ export default function DeploySchedule({ templates, onStatusChange, onBack }: De
   }
 
   async function handleDeploy() {
-    if (previewEvents.length === 0) return
+    if (previewEvents.length === 0 || isDeploying) return
+    setIsDeploying(true)
     onStatusChange(`DEPLOYING ${previewEvents.length} EVENTS...`)
     const result = await batchCreateEvents(previewEvents)
     if (result.data) {
@@ -69,6 +71,7 @@ export default function DeploySchedule({ templates, onStatusChange, onBack }: De
     } else {
       onStatusChange(`ERROR: ${result.error}`)
     }
+    setIsDeploying(false)
   }
 
   return (
