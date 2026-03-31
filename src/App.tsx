@@ -4,10 +4,16 @@ import Homepage from './components/Homepage'
 import Shell from './components/Shell'
 import StationPlaceholder from './components/StationPlaceholder'
 import BootSequence, { SESSION_KEY } from './components/BootSequence'
+import TerminalStation from './stations/terminal/TerminalStation'
 import { STATIONS } from './utils/types'
 
 function StationRoute() {
   const { stationId } = useParams<{ stationId: string }>()
+
+  if (stationId === 'terminal') {
+    return <TerminalStation />
+  }
+
   const station = STATIONS.find((s) => s.id === stationId)
   const name = station ? station.name : 'UNKNOWN'
 
