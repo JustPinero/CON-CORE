@@ -3,13 +3,18 @@ import { getOAuth2Client } from '../_utils/google-auth'
 import { encrypt, decrypt } from '../_utils/crypto'
 import { getSupabaseAdmin } from '../_utils/supabase'
 import { success, error, methodNotAllowed } from '../_utils/response'
+import { handleCors } from '../_utils/cors'
+import { validateEnv } from '../_utils/env'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (handleCors(req, res)) return
+
   if (req.method !== 'POST') {
     return methodNotAllowed(res, ['POST'])
   }
 
   try {
+    validateEnv()
     const supabase = getSupabaseAdmin()
 
     const { data: tokenRow, error: fetchError } = await supabase
@@ -37,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? new Date(credentials.expiry_date).toISOString()
       : null
 
-    await supabase
+    const { error: updateError } = await supabase
       .from('auth_tokens')
       .update({
         access_token_encrypted: encryptedAccess,
@@ -45,6 +50,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', 'primary')
+
+    if (updateError) {
+      return error(res, 500, `Failed to update tokens: ${updateError.message}`)
+    }
 
     return success(res, { tokenExpiry: expiry })
   } catch (err) {

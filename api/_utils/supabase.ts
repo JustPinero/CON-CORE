@@ -1,6 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-export function getSupabaseAdmin() {
+let client: SupabaseClient | null = null
+
+export function getSupabaseAdmin(): SupabaseClient {
+  if (client) return client
+
   const url = process.env.SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -8,5 +12,6 @@ export function getSupabaseAdmin() {
     throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
   }
 
-  return createClient(url, key)
+  client = createClient(url, key)
+  return client
 }

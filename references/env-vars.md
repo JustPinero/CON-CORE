@@ -16,9 +16,17 @@ All environment variables required by the application. No actual values are stor
 
 | Variable | Description | Used In | Timing | Security Notes |
 |---|---|---|---|---|
+| `DATABASE_URL` | Direct PostgreSQL connection string for Supabase | Database migrations, direct DB access | Runtime (server) | SECRET — contains credentials for direct DB access |
 | `SUPABASE_URL` | Supabase project URL (e.g., `https://xxxxx.supabase.co`) | All `/api/*` routes that access DB | Runtime (server) | Not secret, but keep server-side |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key — bypasses RLS | All `/api/*` routes that access DB | Runtime (server) | SECRET — full admin access to DB. Never expose client-side. Never use `anon` key server-side for admin ops |
-| `SUPABASE_ANON_KEY` | Supabase anonymous/public key | Not currently used (reserved for future client-side direct access) | Runtime | Public key, safe to expose but not needed in current architecture |
+| `SUPABASE_ANON_KEY` | Supabase anonymous/public key | Not currently used server-side (reserved for future use) | Runtime | Public key, safe to expose |
+
+## Frontend (Build-Time)
+
+| Variable | Description | Used In | Timing | Security Notes |
+|---|---|---|---|---|
+| `VITE_SUPABASE_URL` | Supabase project URL for client-side access | Frontend Supabase client | Build-time (client) | Baked into JS bundle at build. Safe to expose — public project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous/public key for client-side access | Frontend Supabase client | Build-time (client) | Baked into JS bundle at build. Safe to expose — public anon key |
 
 ## Anthropic Claude
 
@@ -26,18 +34,11 @@ All environment variables required by the application. No actual values are stor
 |---|---|---|---|---|
 | `ANTHROPIC_API_KEY` | Anthropic API key for Claude access | `/api/claude/*` routes | Runtime (server) | SECRET — must be server-side only. Starts with `sk-ant-`. Never prefix with `VITE_` |
 
-## Token Encryption
+## Session Encryption
 
 | Variable | Description | Used In | Timing | Security Notes |
 |---|---|---|---|---|
-| `TOKEN_ENCRYPTION_KEY` | AES-256 key for encrypting OAuth tokens at rest in Supabase | `/api/auth/*` routes | Runtime (server) | SECRET — generate with `openssl rand -hex 32`. Loss of this key means stored tokens become unrecoverable |
-
-## Application
-
-| Variable | Description | Used In | Timing | Security Notes |
-|---|---|---|---|---|
-| `VITE_APP_URL` | Public-facing app URL (e.g., `https://your-app.vercel.app`) | Frontend routing, OAuth redirect construction | Build-time (client) | Baked into JS bundle at build. Safe to expose — it is the public URL |
-| `RATE_LIMIT_DAILY_CAP` | Maximum total Claude API calls per day | `/api/claude/*` routes | Runtime (server) | Not secret. Prevents runaway API costs. Default: 200 |
+| `SESSION_SECRET` | AES-256 key for encrypting OAuth tokens at rest in Supabase | `/api/auth/*` routes | Runtime (server) | SECRET — generate with `openssl rand -hex 32`. Loss of this key means stored tokens become unrecoverable |
 
 ---
 
@@ -75,19 +76,21 @@ A `.env.example` file must be committed to the repository with all variable name
 # Google OAuth2
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/callback
 
-# Supabase
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# Anthropic Claude
+# Anthropic Claude API
 ANTHROPIC_API_KEY=
 
-# Token Encryption
-TOKEN_ENCRYPTION_KEY=
+# Supabase
+DATABASE_URL=
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_ANON_KEY=
 
-# Application
-VITE_APP_URL=
-RATE_LIMIT_DAILY_CAP=200
+# Session encryption (used to encrypt OAuth tokens at rest)
+SESSION_SECRET=
+
+# Frontend (build-time, safe to expose)
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
 ```

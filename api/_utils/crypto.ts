@@ -1,13 +1,17 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
+import { createCipheriv, createDecipheriv, randomBytes, createHash } from 'crypto'
 
 const ALGORITHM = 'aes-256-gcm'
 
+let cachedKey: Buffer | null = null
+
 function getKey(): Buffer {
+  if (cachedKey) return cachedKey
   const secret = process.env.SESSION_SECRET
   if (!secret || secret.length < 32) {
     throw new Error('SESSION_SECRET must be at least 32 characters')
   }
-  return Buffer.from(secret.slice(0, 32), 'utf-8')
+  cachedKey = createHash('sha256').update(secret).digest()
+  return cachedKey
 }
 
 export function encrypt(text: string): string {

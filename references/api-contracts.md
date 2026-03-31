@@ -5,7 +5,7 @@ All routes are Vercel Serverless Functions in the `/api` directory. All response
 ```typescript
 interface ApiResponse<T> {
   data: T | null;
-  error: { code: string; message: string } | null;
+  error: string | null;
   meta?: { count?: number; page?: number; cached?: boolean };
 }
 ```
@@ -80,7 +80,7 @@ List unique senders with message counts and category breakdowns.
       "senderAddress": "noreply@example.com",
       "senderName": "Example Co",
       "messageCount": 142,
-      "categoryBreakdown": { "promotions": 100, "receipts": 42 },
+      "categoryBreakdown": { "promo": 100, "transactional": 42 },
       "lastAnalyzed": "2026-03-30T10:00:00Z",
       "unsubscribeVector": true,
       "dossierSummary": "E-commerce retailer..."
@@ -284,7 +284,7 @@ Use Claude to categorize a sender's emails.
 {
   "data": {
     "senderAddress": "noreply@example.com",
-    "categoryBreakdown": { "promotions": 100, "receipts": 42 },
+    "categoryBreakdown": { "promo": 100, "transactional": 42 },
     "dossierSummary": "E-commerce retailer sending promotional offers and order confirmations.",
     "unsubscribeVector": true
   },
@@ -408,7 +408,7 @@ Generate a daily inbox briefing summary.
     { "senderAddress": "boss@work.com", "senderName": "Boss", "messageCount": 3, "category": "work" }
   ],
   "unreadCount": 47,
-  "topCategories": { "promotions": 20, "work": 15, "newsletters": 12 }
+  "topCategories": { "promo": 20, "work": 15, "newsletter": 12 }
 }
 ```
 - **Response:**
@@ -420,7 +420,7 @@ Generate a daily inbox briefing summary.
       { "senderName": "Boss", "messageCount": 3, "urgency": "high" }
     ],
     "recommendedActions": [
-      { "action": "batch-archive", "target": "promotions", "count": 20 }
+      { "action": "batch-archive", "target": "promo", "count": 20 }
     ]
   },
   "error": null
@@ -475,10 +475,11 @@ Health check endpoint. No auth required.
 ```json
 {
   "data": {
-    "status": "ok",
-    "timestamp": "2026-03-31T12:00:00Z",
-    "version": "0.1.0"
+    "status": "ok"
   },
-  "error": null
+  "error": null,
+  "meta": {
+    "timestamp": "2026-03-31T12:00:00Z"
+  }
 }
 ```
