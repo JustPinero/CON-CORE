@@ -53,6 +53,8 @@ CREATE TABLE schedule_templates (
 );
 ```
 
+> **Phase 3 implementation note:** Templates are currently stored in localStorage for rapid prototyping. Supabase migration planned for a future phase.
+
 ---
 
 ## bookmark_vaults
@@ -115,6 +117,8 @@ CREATE TABLE subscriptions (
   deleted_at        TIMESTAMPTZ
 );
 ```
+
+> **Phase 3 implementation note:** Subscription detection results are currently ephemeral (held in React state from Claude API responses). Supabase persistence planned for a future phase.
 
 ---
 

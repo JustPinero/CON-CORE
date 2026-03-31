@@ -20,11 +20,11 @@ describe('App', () => {
 
   it('renders station shell with STATION OFFLINE placeholder for unbuilt stations', () => {
     render(
-      <MemoryRouter initialEntries={['/station/schedule']}>
+      <MemoryRouter initialEntries={['/station/security']}>
         <App />
       </MemoryRouter>,
     )
-    expect(screen.getByText('SCHEDULE')).toBeInTheDocument()
+    expect(screen.getByText('SECURITY')).toBeInTheDocument()
     expect(screen.getByText('STATION OFFLINE')).toBeInTheDocument()
   })
 

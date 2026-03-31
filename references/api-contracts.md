@@ -190,8 +190,8 @@ List calendar events in a date range.
 
 - **Auth required:** Yes
 - **Query params:**
-  - `startDate` (string, ISO 8601, required)
-  - `endDate` (string, ISO 8601, required)
+  - `timeMin` (string, ISO 8601, required)
+  - `timeMax` (string, ISO 8601, required)
   - `calendarId` (string, optional, default "primary")
 - **Response:**
 ```json
@@ -220,24 +220,19 @@ Create multiple calendar events from a schedule template.
 - **Request body:**
 ```json
 {
-  "templateId": "uuid",
-  "dates": ["2026-04-01", "2026-04-02", "2026-04-03"],
-  "skipConflicts": true
+  "events": [
+    { "summary": "Deep Work", "start": "2026-04-01T09:00:00Z", "end": "2026-04-01T10:00:00Z", "calendarId": "primary" }
+  ]
 }
 ```
+  - `events` (array, required) — each item: `summary` (string), `start` (ISO 8601), `end` (ISO 8601), `calendarId` (string, optional)
 - **Response:**
 ```json
 {
   "data": {
-    "createdCount": 15,
-    "skippedCount": 3,
-    "skippedDetails": [
-      {
-        "date": "2026-04-02",
-        "timeBlock": "09:00-10:00",
-        "conflictsWith": "Existing meeting"
-      }
-    ]
+    "created": 15,
+    "failed": 0,
+    "total": 15
   },
   "error": null
 }
@@ -253,22 +248,25 @@ Check for scheduling conflicts before batch creation.
 - **Request body:**
 ```json
 {
-  "templateId": "uuid",
-  "dates": ["2026-04-01", "2026-04-02"]
+  "events": [
+    { "summary": "Deep Work", "start": "2026-04-01T09:00:00Z", "end": "2026-04-01T10:00:00Z" }
+  ],
+  "calendarId": "primary"
 }
 ```
+  - `events` (array, required) — each item: `summary` (string), `start` (ISO 8601), `end` (ISO 8601)
+  - `calendarId` (string, optional, default "primary")
 - **Response:**
 ```json
 {
   "data": {
     "conflicts": [
       {
-        "date": "2026-04-01",
-        "timeBlock": { "start_time": "09:00", "end_time": "10:00", "label": "Deep Work" },
-        "existingEvent": { "summary": "Team standup", "start": "09:00", "end": "09:30" }
+        "proposed": { "summary": "Deep Work", "start": "2026-04-01T09:00:00Z", "end": "2026-04-01T10:00:00Z" },
+        "existing": { "summary": "Team standup", "start": "2026-04-01T09:00:00Z", "end": "2026-04-01T09:30:00Z" }
       }
     ],
-    "conflictCount": 1
+    "hasConflicts": true
   },
   "error": null
 }
@@ -350,29 +348,19 @@ Use Claude to categorize a list of bookmarks.
 Use Claude to find recurring subscriptions in email receipts.
 
 - **Auth required:** Yes
-- **Request body:**
-```json
-{
-  "receiptSubjects": [
-    { "subject": "Your Netflix payment", "sender": "info@netflix.com", "date": "2026-03-01" },
-    { "subject": "Spotify Premium receipt", "sender": "no-reply@spotify.com", "date": "2026-03-15" }
-  ]
-}
-```
+- **Request body:** `{}` (empty — server fetches receipt emails from Gmail directly)
 - **Response:**
 ```json
 {
-  "data": {
-    "subscriptions": [
-      {
-        "serviceName": "Netflix",
-        "monthlyCost": 15.49,
-        "category": "streaming",
-        "detectedSince": "2026-01-01T00:00:00Z",
-        "lastCharge": "2026-03-01T00:00:00Z"
-      }
-    ]
-  },
+  "data": [
+    {
+      "serviceName": "Netflix",
+      "monthlyCost": 15.49,
+      "category": "streaming",
+      "detectedSince": "2026-01-01",
+      "lastCharge": "2026-03-01"
+    }
+  ],
   "error": null
 }
 ```

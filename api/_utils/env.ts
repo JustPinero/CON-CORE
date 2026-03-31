@@ -10,14 +10,10 @@ const envSchema = z.object({
   SESSION_SECRET: z.string().min(32),
 })
 
-let validated = false
-
 export function validateEnv() {
-  if (validated) return
   const result = envSchema.safeParse(process.env)
   if (!result.success) {
     const missing = result.error.issues.map((i) => i.path.join('.')).join(', ')
     throw new Error(`Missing or invalid environment variables: ${missing}`)
   }
-  validated = true
 }
